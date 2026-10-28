@@ -13,6 +13,9 @@ export default [
       '**/node_modules/**',
       '.claude/worktrees/**',
 
+      // workspace-local dev images: own package.json/node_modules in-image
+      '.github/dev/**',
+
       // buf
       'packages/bsky/src/proto/**',
       'packages/bsync/src/proto/**',
