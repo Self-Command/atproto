@@ -3,7 +3,6 @@ import {
   Database,
   DataPlaneServer,
   RepoSubscription,
-  ServerConfig,
 } from '@atproto/bsky'
 
 const db = new Database({
@@ -39,7 +38,15 @@ if (process.env.REPO_PROVIDER) {
 
 let bsyncSub
 if (process.env.BSKY_BSYNC_URL) {
-  bsyncSub = new BsyncSubscription({ db, config: ServerConfig.readEnv() })
+  bsyncSub = new BsyncSubscription({
+    db,
+    // Only bsync fields are needed; ServerConfig.readEnv() demands AppView-only
+    // settings such as BSKY_DATAPLANE_URLS that a dataplane does not have.
+    config: {
+      bsyncUrl: process.env.BSKY_BSYNC_URL,
+      bsyncApiKey: process.env.BSKY_BSYNC_API_KEY,
+    },
+  })
   bsyncSub.start()
   console.log(`bsync subscription started: ${process.env.BSKY_BSYNC_URL}`)
 }
