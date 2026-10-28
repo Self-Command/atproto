@@ -13,6 +13,10 @@ const plcUrl = process.env.PLC_URL || 'http://plc:3000'
 const outputPath = process.env.PLC_BOOTSTRAP_OUT || '/out/service.env'
 const pdsUrl = process.env.PDS_PUBLIC_URL || 'http://localhost:2583'
 const ozoneUrl = process.env.OZONE_PUBLIC_URL || 'http://localhost:2586'
+// Endpoint written to the DID document: consumed by services inside the
+// compose network (PDS proxies tools.ozone.* through it), not by browsers.
+const ozoneServiceEndpoint =
+  process.env.OZONE_SERVICE_ENDPOINT || ozoneUrl
 const handleDomain = process.env.PLC_BOOTSTRAP_HANDLE_DOMAIN || 'local.test'
 
 const client = new Client(plcUrl)
@@ -111,7 +115,9 @@ async function ensureOzoneLabelerIdentity({ did, rotationKey, signingKey }) {
   if (!data) throw new Error('ozone DID is not resolvable in the local PLC')
   const hasKey = !!data.verificationMethods?.atproto_label
   const hasService = !!data.services?.atproto_labeler
-  if (hasKey && hasService) {
+  const endpointMatches =
+    data.services?.atproto_labeler?.endpoint === ozoneServiceEndpoint
+  if (hasKey && hasService && endpointMatches) {
     logs.push('ozone: labeler identity already present')
     return
   }
@@ -126,12 +132,16 @@ async function ensureOzoneLabelerIdentity({ did, rotationKey, signingKey }) {
       ...normalized.services,
       atproto_labeler: {
         type: 'AtprotoLabeler',
-        endpoint: ozoneUrl,
+        endpoint: ozoneServiceEndpoint,
       },
     },
   }))
   await client.sendOperation(did, updated)
-  logs.push('ozone: added atproto_label key and atproto_labeler service')
+  logs.push(
+    hasKey && hasService
+      ? `ozone: updated atproto_labeler endpoint to ${ozoneServiceEndpoint}`
+      : 'ozone: added atproto_label key and atproto_labeler service',
+  )
 }
 
 async function getDocumentData(did) {
