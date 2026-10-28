@@ -19,9 +19,7 @@ const server = PlcServer.create({
   version: process.env.PLC_VERSION || 'workspace-dev',
 })
 await server.start()
-console.log(
-  `PLC listening on ${port} (${postgresUrl ? 'postgres' : 'memory'})`,
-)
+console.log(`PLC listening on ${port} (${postgresUrl ? 'postgres' : 'memory'})`)
 
 const shutdown = async () => {
   await server.destroy()

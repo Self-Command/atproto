@@ -19,7 +19,9 @@ const client = new Client(plcUrl)
 const values = readEnvFile(outputPath)
 const logs = []
 
-const pdsRotationKey = await keypair('PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX')
+const pdsRotationKey = await keypair(
+  'PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX',
+)
 const appviewRotationKey = await keypair('STACK_APPVIEW_ROTATION_KEY_HEX')
 const ozoneRotationKey = await keypair('STACK_OZONE_ROTATION_KEY_HEX')
 const appviewSigningKey = await keypair('BSKY_SERVICE_SIGNING_KEY')
@@ -88,7 +90,9 @@ async function ensureDid({ envKey, label, handle, rotationKey, signingKey }) {
       logs.push(`${label}: reusing ${existingDid}`)
       return existingDid
     }
-    logs.push(`${label}: ${existingDid} is unknown to the local PLC, recreating`)
+    logs.push(
+      `${label}: ${existingDid} is unknown to the local PLC, recreating`,
+    )
   }
   const { op, did } = await createOp({
     signingKey: signingKey.did(),
