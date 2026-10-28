@@ -7,7 +7,7 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY server.mjs ./
+COPY server.mjs bootstrap.mjs ./
 
 USER node
 EXPOSE 3000
